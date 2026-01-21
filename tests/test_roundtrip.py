@@ -35,6 +35,11 @@ def prettify(xml, **kwargs):
 
 @pytest.mark.parametrize("filename", samples)
 def test_sample_roundtrip(filename):
+    # FIXME: Skip test until LineDeliveryNoteReferencedDocument.line_id field is implemented
+    # Will be dropped in the next commit
+    if filename == "zugferd_2p3_EXTENDED_Warenrechnung-DeliveryNoteReferencedDocument-LineID.xml":
+        pytest.skip("Skipping until LineDeliveryNoteReferencedDocument.line_id is implemented")
+
     origxml = prettify(
         open(os.path.join(os.path.dirname(__file__), "samples", filename), "rb").read(),
         remove_comments=True,
@@ -78,3 +83,18 @@ def test_sample_roundtrip(filename):
 
     # Compare output XML
     assert origxml == generatedxml
+
+
+# This test will be dropped in the next commit
+def test_delivery_note_line_id_error():
+    """Test that demonstrates the TypeError when parsing DeliveryNoteReferencedDocument with LineID."""
+    filename = "zugferd_2p3_EXTENDED_Warenrechnung-DeliveryNoteReferencedDocument-LineID.xml"
+    filepath = os.path.join(os.path.dirname(__file__), "samples", filename)
+
+    origxml = prettify(
+        open(filepath, "rb").read(),
+        remove_comments=True,
+    )
+
+    with pytest.raises(TypeError, match=r"Unknown element.*LineID"):
+        Document.parse(origxml)
